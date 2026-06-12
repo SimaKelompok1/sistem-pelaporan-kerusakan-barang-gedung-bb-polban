@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pelaporan Kerusakan Gedung Polban - Gedung BB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-4xl mx-auto text-center mb-10">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Pelaporan Kerusakan</h1>
+        <p class="text-gray-500 mb-6">Monitoring Fasilitas Fisik & Utilitas Gedung BB Polban</p>
+        
+        <div class="grid grid-cols-3 gap-4">
+            <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200 shadow-sm text-center">
+                <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Menunggu</p>
+                <p id="countMenunggu" class="text-4xl font-bold text-amber-600 mt-2">0</p>
+            </div>
+            <div class="bg-blue-50 p-5 rounded-2xl border border-blue-200 shadow-sm text-center">
+                <p class="text-xs font-bold text-blue-700 uppercase tracking-wider">Diproses</p>
+                <p id="countDiproses" class="text-4xl font-bold text-blue-600 mt-2">0</p>
+            </div>
+            <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-200 shadow-sm text-center">
+                <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Selesai</p>
+                <p id="countSelesai" class="text-4xl font-bold text-emerald-600 mt-2">0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="text-lg font-bold text-gray-800">Semua Riwayat Laporan Masuk</h3>
+            <a href="form-lapor.html" class="text-sm font-semibold text-blue-600 hover:underline">+ Buat Laporan Baru</a>
+        </div>
+        
+        <div id="listSemuaLaporan" class="space-y-4">
+            <p id="teksKosong" class="text-center text-sm text-gray-400 py-6">Belum ada laporan masuk. Silakan isi form terlebih dahulu.</p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto text-center mt-12 pb-6">
+        <a href="teknisi.html" class="text-xs text-gray-400 hover:text-gray-600 transition">🔒 Masuk sebagai Teknisi Sarpras</a>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const listLaporan = JSON.parse(localStorage.getItem('databaseLaporan')) || [];
+            
+            if(listLaporan.length > 0) {
+                // Sembunyikan teks kosong
+                document.getElementById('teksKosong').style.display = 'none';
+                
+                let menunggu = 0, diproses = 0, selesai = 0;
+                const wadah = document.getElementById('listSemuaLaporan');
+                
+                // Urutkan dari yang paling baru dimasukkan (Paling atas)
+                listLaporan.reverse().forEach(laporan => {
+                    // Hitung Angka Dashboard
+                    if(laporan.status === "Diterima") menunggu++;
+                    if(laporan.status === "Sedang Diperbaiki" || laporan.status === "Diverifikasi") diproses++;
+                    if(laporan.status === "Selesai") selesai++;
+                    
+                    // Tentukan lebar Progress Bar berdasarkan status
+                    let widthBar = "25%";
+                    if(laporan.status === "Sedang Diperbaiki") widthBar = "75%";
+                    if(laporan.status === "Selesai") widthBar = "100%";
+
+                    // Bikin kartu HTML untuk tiap laporan
+                    wadah.innerHTML += `
+                        <div class="p-4 border border-gray-200 rounded-xl space-y-3 bg-gray-50/50">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">${laporan.id}</span>
+                                <span class="text-xs text-gray-400">${laporan.waktu}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-base">${laporan.kelas} — <span class="font-normal text-gray-600">${laporan.deskripsi}</span></h4>
+                                <p class="text-xs text-gray-500 mt-1">Pelapor: <span class="font-semibold text-gray-700">${laporan.nama}</span> | Petugas: <span class="font-semibold text-gray-700">Pak Toto</span></p>
+                            </div>
+                            <div class="pt-2">
+                                <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-blue-500 h-full" style="width: ${widthBar}"></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] font-bold text-gray-400 mt-2">
+                                    <span class="${laporan.status === 'Diterima' ? 'text-blue-600':''}">Diterima</span>
+                                    <span class="${laporan.status === 'Diverifikasi' ? 'text-blue-600':''}">Diverifikasi</span>
+                                    <span class="${laporan.status === 'Sedang Diperbaiki' ? 'text-blue-600':''}">Sedang Diperbaiki</span>
+                                    <span class="${laporan.status === 'Selesai' ? 'text-emerald-600':''}">Selesai</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Update Angka di Dashboard Atas
+                document.getElementById('countMenunggu').innerText = menunggu;
+                document.getElementById('countDiproses').innerText = diproses;
+                document.getElementById('countSelesai').innerText = selesai;
+            }
+        }
+    </script>
+</body>
+</html>

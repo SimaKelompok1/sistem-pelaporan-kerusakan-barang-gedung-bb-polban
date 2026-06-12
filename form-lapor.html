@@ -1,0 +1,94 @@
+<<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Pelaporan Kerusakan Gedung BB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Form Pelaporan</h2>
+            <a href="index.html" class="text-sm font-semibold text-blue-600 hover:underline">← Kembali</a>
+        </div>
+        
+        <form id="reportForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pelapor</label>
+                <input type="text" id="namaPelapor" placeholder="Masukkan nama Anda" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Waktu Melaporkan</label>
+                <input type="datetime-local" id="waktuLapor" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Lokasi Gedung</label>
+                <input type="text" value="Gedung BB" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-500 cursor-not-allowed" readonly>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Lokasi Kelas / Area Detail</label>
+                <input type="text" id="lokasiKelas" placeholder="Contoh: BB-201, Tangga Lantai 1" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Deskripsi Kerusakan</label>
+                <textarea id="deskripsi" rows="3" placeholder="Detail kerusakan..." class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Foto Objek Rusak</label>
+                <input type="file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition duration-200 mt-2">Kirim Laporan 🚀</button>
+        </form>
+    </div>
+
+    <script>
+    document.getElementById('reportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const fileInput = document.querySelector('input[type="file"]');
+        const file = fileInput.files[0];
+        
+        // Fungsi pembaca file gambar
+        const reader = new FileReader();
+        
+        reader.onloadend = function() {
+            // Hasil konversi gambar menjadi teks kode (Base64)
+            const gambarBase64 = reader.result;
+            
+            const listLaporan = JSON.parse(localStorage.getItem('databaseLaporan')) || [];
+            const nomorTiket = "#BB-" + String(listLaporan.length + 1).padStart(3, '0');
+
+            const dataLaporan = {
+                id: nomorTiket,
+                nama: document.getElementById('namaPelapor').value,
+                waktu: document.getElementById('waktuLapor').value,
+                kelas: document.getElementById('lokasiKelas').value,
+                deskripsi: document.getElementById('deskripsi').value,
+                foto: gambarBase64, // Menyimpan teks kode gambar ke memori
+                status: "Diterima"
+            };
+
+            listLaporan.push(dataLaporan);
+            localStorage.setItem('databaseLaporan', JSON.stringify(listLaporan));
+            
+            alert('Laporan ' + nomorTiket + ' sukses terkirim dengan lampiran foto!');
+            window.location.href = "index.html";
+        };
+
+        if (file) {
+            reader.readAsDataURL(file); // Jalankan konversi kalau ada file
+        } else {
+            alert('Harap pilih foto objek rusak terlebih dahulu!');
+        }
+    });
+</script>
+</body>
+</html>
